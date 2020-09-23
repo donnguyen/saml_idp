@@ -29,7 +29,7 @@ module SamlIdp
 
     def initialize(raw_xml = "", service_provider_config = nil)
       self.raw_xml = raw_xml
-      self.service_provider_config = service_provider_config
+      @service_provider_config = service_provider_config
     end
 
     def logout_request?
@@ -188,11 +188,11 @@ module SamlIdp
     private :signature_namespace
 
     def service_provider_finder
-      config.service_provider.finder if service_provider_config.blank?
+      return config.service_provider.finder if @service_provider_config.blank?
 
-      { service_provider_config[:identifier].to_s => {
-        "response_hosts" => service_provider_config[:response_hosts],
-        "metadata_url"   => service_provider_config[:metadata_url]
+      { @service_provider_config[:identifier].to_s => {
+        "response_hosts" => @service_provider_config[:response_hosts],
+        "metadata_url"   => @service_provider_config[:metadata_url]
       } }
     end
     private :service_provider_finder
