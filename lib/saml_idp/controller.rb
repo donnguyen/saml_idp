@@ -46,9 +46,8 @@ module SamlIdp
       false
     end
 
-    def metadata(service_provider_config)
-      saml_idp_config = SamlIdp::Configurator.new(service_provider_config)
-      MetadataBuilder.new(saml_idp_config)
+    def metadata(service_provider_config = nil)
+      MetadataBuilder.new(SamlIdp.config, service_provider_config)
     end
 
     def decode_request(raw_saml_request, service_provider)
@@ -69,6 +68,9 @@ module SamlIdp
       expiry = opts[:expiry] || 60*60
       session_expiry = opts[:session_expiry]
       encryption_opts = opts[:encryption] || nil
+      x509_certificate = service_provider_config.present? ? service_provider_config[:x509_certificate] : nil
+      secret_key = service_provider_config.present? ? service_provider_config[:secret_key] : nil
+      password = service_provider_config.present? ? service_provider_config[:password] : nil
 
       SamlResponse.new(
         reference_id,
@@ -83,17 +85,25 @@ module SamlIdp
         expiry,
         encryption_opts,
         session_expiry,
-        service_provider_config
+        x509_certificate,
+        secret_key,
+        password
       ).build
     end
 
-    def encode_logout_response(principal, opts = {})
+    def encode_logout_response(principal, opts = {}, service_provider_config = nil)
+      x509_certificate = service_provider_config.present? ? service_provider_config[:x509_certificate] : nil
+      secret_key = service_provider_config.present? ? service_provider_config[:secret_key] : nil
+      password = service_provider_config.present? ? service_provider_config[:password] : nil
       SamlIdp::LogoutResponseBuilder.new(
         get_saml_response_id,
         (opts[:issuer_uri] || issuer_uri),
         saml_logout_url,
         saml_request_id,
-        (opts[:algorithm] || algorithm || default_algorithm)
+        (opts[:algorithm] || algorithm || default_algorithm),
+        x509_certificate,
+        secret_key,
+        password
       ).signed
     end
 
@@ -101,7 +111,7 @@ module SamlIdp
       if saml_request.authn_request?
         encode_authn_response(principal, opts, service_provider_config)
       elsif saml_request.logout_request?
-        encode_logout_response(principal, opts)
+        encode_logout_response(principal, opts, service_provider_config)
       else
         raise "Unknown request: #{saml_request}"
       end

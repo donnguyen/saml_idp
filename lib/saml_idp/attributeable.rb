@@ -2,9 +2,8 @@ module SamlIdp
   module Attributeable
     extend ActiveSupport::Concern
 
-    def initialize(attributes = {}, service_provider_config = nil)
+    def initialize(attributes = {})
       self.attributes = attributes
-      @saml_idp_config ||= SamlIdp::Configurator.new(service_provider_config)
     end
 
     def attributes

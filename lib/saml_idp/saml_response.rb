@@ -30,7 +30,9 @@ module SamlIdp
           expiry=60*60,
           encryption_opts=nil,
           session_expiry=0,
-          service_provider_config
+          x509_certificate=nil,
+          secret_key=nil,
+          password=nil
           )
       self.reference_id = reference_id
       self.response_id = response_id
@@ -46,7 +48,9 @@ module SamlIdp
       self.expiry = expiry
       self.encryption_opts = encryption_opts
       self.session_expiry = session_expiry
-      @service_provider_config = service_provider_config
+      @x509_certificate = x509_certificate
+      @secret_key = secret_key
+      @password = password
     end
 
     def build
@@ -79,7 +83,9 @@ module SamlIdp
         expiry,
         encryption_opts,
         session_expiry,
-        @service_provider_config
+        @x509_certificate,
+        @secret_key,
+        @password
     end
     private :assertion_builder
   end

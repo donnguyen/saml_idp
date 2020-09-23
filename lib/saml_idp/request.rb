@@ -22,13 +22,14 @@ module SamlIdp
 
     attr_accessor :raw_xml, :service_provider_config
 
+    delegate :config, to: :SamlIdp
+    private :config
     delegate :xpath, to: :document
     private :xpath
 
     def initialize(raw_xml = "", service_provider_config = nil)
       self.raw_xml = raw_xml
       self.service_provider_config = service_provider_config
-      @saml_idp_config ||= SamlIdp::Configurator.new(service_provider_config)
     end
 
     def logout_request?
@@ -125,7 +126,7 @@ module SamlIdp
 
     def service_provider
       return unless issuer.present?
-      @_service_provider ||= ServiceProvider.new((service_provider_finder[issuer] || {}).merge(identifier: issuer), service_provider_config)
+      @_service_provider ||= ServiceProvider.new((service_provider_finder[issuer] || {}).merge(identifier: issuer))
     end
 
     def issuer
@@ -187,7 +188,12 @@ module SamlIdp
     private :signature_namespace
 
     def service_provider_finder
-      @saml_idp_config.service_provider.finder
+      config.service_provider.finder if service_provider_config.blank?
+
+      { service_provider_config[:identifier].to_s => {
+        "response_hosts" => service_provider_config[:response_hosts],
+        "metadata_url"   => service_provider_config[:metadata_url]
+      } }
     end
     private :service_provider_finder
   end
