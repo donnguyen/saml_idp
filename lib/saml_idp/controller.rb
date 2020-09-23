@@ -50,7 +50,7 @@ module SamlIdp
       MetadataBuilder.new(SamlIdp.config, service_provider_config)
     end
 
-    def decode_request(raw_saml_request, service_provider)
+    def decode_request(raw_saml_request, service_provider = nil)
       @saml_request = Request.from_deflated_request(raw_saml_request, service_provider)
     end
 
