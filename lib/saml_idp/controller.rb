@@ -46,19 +46,19 @@ module SamlIdp
       false
     end
 
-    def metadata(service_provider_config = nil)
+    def metadata(service_provider_config = {})
       MetadataBuilder.new(SamlIdp.config, service_provider_config)
     end
 
-    def decode_request(raw_saml_request, service_provider = nil)
-      @saml_request = Request.from_deflated_request(raw_saml_request, service_provider)
+    def decode_request(raw_saml_request, service_provider_config = {})
+      @saml_request = Request.from_deflated_request(raw_saml_request, service_provider_config)
     end
 
     def authn_context_classref
       Saml::XML::Namespaces::AuthnContext::ClassRef::PASSWORD
     end
 
-    def encode_authn_response(principal, opts = {}, service_provider_config = nil)
+    def encode_authn_response(principal, opts = {}, service_provider_config = {})
       response_id = get_saml_response_id
       reference_id = opts[:reference_id] || get_saml_reference_id
       audience_uri = opts[:audience_uri] || saml_request.issuer || saml_acs_url[/^(.*?\/\/.*?\/)/, 1]
@@ -68,9 +68,9 @@ module SamlIdp
       expiry = opts[:expiry] || 60*60
       session_expiry = opts[:session_expiry]
       encryption_opts = opts[:encryption] || nil
-      x509_certificate = service_provider_config.present? ? service_provider_config[:x509_certificate] : nil
-      secret_key = service_provider_config.present? ? service_provider_config[:secret_key] : nil
-      password = service_provider_config.present? ? service_provider_config[:password] : nil
+      x509_certificate = service_provider_config[:x509_certificate]
+      secret_key = service_provider_config[:secret_key]
+      password = service_provider_config[:password]
 
       SamlResponse.new(
         reference_id,
@@ -91,10 +91,10 @@ module SamlIdp
       ).build
     end
 
-    def encode_logout_response(principal, opts = {}, service_provider_config = nil)
-      x509_certificate = service_provider_config.present? ? service_provider_config[:x509_certificate] : nil
-      secret_key = service_provider_config.present? ? service_provider_config[:secret_key] : nil
-      password = service_provider_config.present? ? service_provider_config[:password] : nil
+    def encode_logout_response(principal, opts = {}, service_provider_config = {})
+      x509_certificate = service_provider_config[:x509_certificate]
+      secret_key = service_provider_config[:secret_key]
+      password = service_provider_config[:password]
       SamlIdp::LogoutResponseBuilder.new(
         get_saml_response_id,
         (opts[:issuer_uri] || issuer_uri),
@@ -107,7 +107,7 @@ module SamlIdp
       ).signed
     end
 
-    def encode_response(principal, opts = {}, service_provider_config = nil)
+    def encode_response(principal, opts = {}, service_provider_config = {})
       if saml_request.authn_request?
         encode_authn_response(principal, opts, service_provider_config)
       elsif saml_request.logout_request?
@@ -118,7 +118,9 @@ module SamlIdp
     end
 
     def issuer_uri
-      (defined?(request) && request.url.to_s.split("?").first) || "http://example.com"
+      (SamlIdp.config.base_saml_location.present? && SamlIdp.config.base_saml_location) ||
+        (defined?(request) && request.url.to_s.split("?").first) ||
+        "http://example.com"
     end
 
     def valid_saml_request?

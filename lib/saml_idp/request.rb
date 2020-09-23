@@ -2,7 +2,7 @@ require 'saml_idp/xml_security'
 require 'saml_idp/service_provider'
 module SamlIdp
   class Request
-    def self.from_deflated_request(raw, service_provider_config = nil)
+    def self.from_deflated_request(raw, service_provider_config = {})
       if raw
         decoded = Base64.decode64(raw)
         zstream = Zlib::Inflate.new(-Zlib::MAX_WBITS)
@@ -27,7 +27,7 @@ module SamlIdp
     delegate :xpath, to: :document
     private :xpath
 
-    def initialize(raw_xml = "", service_provider_config = nil)
+    def initialize(raw_xml = "", service_provider_config = {})
       self.raw_xml = raw_xml
       @service_provider_config = service_provider_config
     end

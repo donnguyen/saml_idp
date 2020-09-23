@@ -1,9 +1,26 @@
-require "ostruct"
+# encoding: utf-8
+require 'ostruct'
 module SamlIdp
   class Configurator
-    attr_accessor :x509_certificate, :secret_key, :password, :algorithm, :organization_name, :organization_url, :base_saml_location, :entity_id, :reference_id_generator, :attribute_service_location, :single_service_post_location, :single_logout_service_post_location, :single_logout_service_redirect_location, :attributes, :service_provider, :assertion_consumer_service_hosts, :session_expiry
+    attr_accessor :x509_certificate
+    attr_accessor :secret_key
+    attr_accessor :password
+    attr_accessor :algorithm
+    attr_accessor :organization_name
+    attr_accessor :organization_url
+    attr_accessor :base_saml_location
+    attr_accessor :entity_id
+    attr_accessor :reference_id_generator
+    attr_accessor :attribute_service_location
+    attr_accessor :single_service_post_location
+    attr_accessor :single_logout_service_post_location
+    attr_accessor :single_logout_service_redirect_location
+    attr_accessor :attributes
+    attr_accessor :service_provider
+    attr_accessor :assertion_consumer_service_hosts
+    attr_accessor :session_expiry
 
-    def initialize()
+    def initialize
       self.x509_certificate = Default::X509_CERTIFICATE
       self.secret_key = Default::SECRET_KEY
       self.algorithm = :sha1
@@ -28,7 +45,7 @@ module SamlIdp
 
     class TechnicalContact < OpenStruct
       def mail_to_string
-        "mailto:#{email_address}" if email_address.to_s.length.positive?
+        "mailto:#{email_address}" if email_address.to_s.length > 0
       end
     end
   end
