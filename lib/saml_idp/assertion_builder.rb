@@ -19,7 +19,21 @@ module SamlIdp
 
     delegate :config, to: :SamlIdp
 
-    def initialize(reference_id, issuer_uri, principal, audience_uri, saml_request_id, saml_acs_url, raw_algorithm, authn_context_classref, expiry=60*60, encryption_opts=nil, session_expiry=nil)
+    def initialize(reference_id, 
+      issuer_uri,
+      principal,
+      audience_uri,
+      saml_request_id,
+      saml_acs_url,
+      raw_algorithm,
+      authn_context_classref,
+      expiry=60*60,
+      encryption_opts=nil,
+      session_expiry=nil,
+      x509_certificate=nil,
+      secret_key=nil,
+      password=nil
+    )
       self.reference_id = reference_id
       self.issuer_uri = issuer_uri
       self.principal = principal
@@ -31,6 +45,9 @@ module SamlIdp
       self.expiry = expiry
       self.encryption_opts = encryption_opts
       self.session_expiry = session_expiry.nil? ? config.session_expiry : session_expiry
+      @x509_certificate = x509_certificate
+      @secret_key = secret_key
+      @password = password
     end
 
     def fresh

@@ -8,8 +8,11 @@ module SamlIdp
     include Signable
     attr_accessor :configurator
 
-    def initialize(configurator = SamlIdp.config)
+    def initialize(configurator = SamlIdp.config, service_provider_config = {})
       self.configurator = configurator
+      @x509_certificate = service_provider_config[:x509_certificate]
+      @secret_key = service_provider_config[:secret_key]
+      @password = service_provider_config[:password]
     end
 
     def fresh
@@ -138,7 +141,8 @@ module SamlIdp
     private :raw_algorithm
 
     def x509_certificate
-      SamlIdp.config.x509_certificate
+      x509 = @x509_certificate || SamlIdp.config.x509_certificate
+      x509
       .to_s
       .gsub(/-----BEGIN CERTIFICATE-----/,"")
       .gsub(/-----END CERTIFICATE-----/,"")

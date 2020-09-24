@@ -65,12 +65,12 @@ module SamlIdp
     private :sign?
 
     def signature
-      SignatureBuilder.new(signed_info_builder).raw
+      SignatureBuilder.new(signed_info_builder, @x509_certificate).raw
     end
     private :signature
 
     def signed_info_builder
-      SignedInfoBuilder.new(get_reference_id, get_digest, get_algorithm)
+      SignedInfoBuilder.new(get_reference_id, get_digest, get_algorithm, @secret_key, @password)
     end
     private :signed_info_builder
 
